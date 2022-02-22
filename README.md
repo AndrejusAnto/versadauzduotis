@@ -1,2 +1,2 @@
 # versadauzduotis
-Versada darbo pkalbio užduotis
+Versada darbo pokalbio užduotis
