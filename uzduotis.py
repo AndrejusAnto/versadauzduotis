@@ -16,10 +16,13 @@ import smtplib, ssl
 # python uzduotis.py send C:\Users\Admin\Desktop\versada\birthdays.csv
 
 lines = []
+send_no = []
+send_yes = []
 lines_numb = 0
 email_numb = 0
 all_emails = {}
 
+# paprastas serveris patikrinti emailų siuntimą per localhost
 port = 1025  # For starttls
 smtp_server = "localhost"
 sender_email = "andrejusantoninovas@gmail.com"
@@ -47,20 +50,6 @@ def check_file(fname, email_numb):
 				print("File is empty")
 		else:
 			print("Can't open file")
-
-def email_message(email, name, bname, bday, delta):
-	if (bday[1] < 10) or (bday[2] < 10):
-		birthday = f"{bday[0]}-0{bday[1]}-0{bday[2]}"
-	else:
-		birthday = f"{bday[0]}-{bday[1]}-{bday[2]}"
-	print(f"Sedning email to {email}")
-	print(f"Subject: Birthday Reminder: {bname}'s birthday on {birthday}")
-	print(f"Hi {name}")
-	print(f"This is a reminder that {bname} will be celebrating their birthday on {birthday}.")
-	print(f"There are {delta} days left to get a present!")
-
-send_no = []
-send_yes = []
 
 def message_form(name, bname, bday, delta):
 	if (bday[1] < 10) or (bday[2] < 10):
