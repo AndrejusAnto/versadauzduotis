@@ -2,11 +2,10 @@ import csv
 import calendar
 from datetime import date
 import sys
+import smtplib, ssl
+# from sqlitedict import SqliteDict
 
-lines = []
-lines_numb = 0
-email_numb = 0
-all_emails = {}
+# email server python -m smtpd -c DebuggingServer -n localhost:1025
 
 # The script should have two commands/options:
 
@@ -15,6 +14,15 @@ all_emails = {}
 
 # option send: 2.check for upcoming birthdays and send emails if there are any. Exit once emails are sent.
 # python uzduotis.py send C:\Users\Admin\Desktop\versada\birthdays.csv
+
+lines = []
+lines_numb = 0
+email_numb = 0
+all_emails = {}
+
+port = 1025  # For starttls
+smtp_server = "localhost"
+sender_email = "andrejusantoninovas@gmail.com"
 
 options = sys.argv[1:]
 filename = options[1]
@@ -47,7 +55,6 @@ def email_message(email, name, bname, bday, delta):
 		birthday = f"{bday[0]}-{bday[1]}-{bday[2]}"
 	print(f"Sedning email to {email}")
 	print(f"Subject: Birthday Reminder: {bname}'s birthday on {birthday}")
-	print("Body:")
 	print(f"Hi {name}")
 	print(f"This is a reminder that {bname} will be celebrating their birthday on {birthday}.")
 	print(f"There are {delta} days left to get a present!")
@@ -55,9 +62,19 @@ def email_message(email, name, bname, bday, delta):
 send_no = []
 send_yes = []
 
-def send_email():
+def message_form(name, bname, bday, delta):
+	if (bday[1] < 10) or (bday[2] < 10):
+		bday = f"{bday[0]}-0{bday[1]}-0{bday[2]}"
+	else:
+		bday = f"{bday[0]}-{bday[1]}-{bday[2]}"
+	sub = f"Subject: Birthday Reminder: {bname}'s birthday on {bday}\n\n"
+	body = f"Hi {name}\nThis is a reminder that {bname} will be celebrating their birthday on {bday}."
+	end = f"\nThere are {delta} days left to get a present!"
+	msg = sub + body + end
+	return msg
+
+def find_bdays():
 	if lines_numb == email_numb:
-		print(email_numb)
 		for k, v in all_emails.items():
 			dateinfo = v[1]
 			today = date.today()
@@ -70,18 +87,22 @@ def send_email():
 			else:
 				send_yes.append([k, *v[:-1]])
 
-	if send_no and send_yes:    
-		for y in send_yes:
-			for n in send_no:
-				pass
-				# print("baigta")
-				email_message(y[0], y[1], n[0], n[1], n[2])
+def send_email(sno, syes):
+	find_bdays()
+	with smtplib.SMTP(smtp_server, port) as server:
+		if sno and syes:
+			for y in syes:
+				for n in sno:
+					message = message_form(y[1], n[0], n[1], n[2])
+					server.sendmail(sender_email, y[0], message)
 
 if(options[0] == "check"):
 	check_file(filename, email_numb)
 
 if(options[0] == "send"):
 	check_file(filename, email_numb)
-	send_email()
+	send_email(send_no, send_yes)
+	for bd in send_no:
+		print(bd)
 
 print("Finished")
