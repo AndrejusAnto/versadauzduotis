@@ -3,9 +3,11 @@ import calendar
 from datetime import date
 import sys
 import smtplib, ssl
+import os
 # from sqlitedict import SqliteDict
 
-# email server python -m smtpd -c DebuggingServer -n localhost:1025
+# email server:
+# python -m smtpd -c DebuggingServer -n localhost:1025
 
 # The script should have two commands/options:
 
@@ -30,6 +32,9 @@ sender_email = "andrejusantoninovas@gmail.com"
 options = sys.argv[1:]
 filename = options[1]
 
+db_filename = os.getcwd()+"\\bdays.sqlite"
+db = SqliteDict("bdays.sqlite")
+
 def check_file(fname, email_numb):
 	with open(fname, newline='') as csvfile:
 		if csvfile:
@@ -38,18 +43,19 @@ def check_file(fname, email_numb):
 			if(lines_numb != 0):
 				for line in lines:
 					if (line[0] == '') or (line[1] == '') or (line[2] == ''):
-						print("Name, email or date is missing, please check ;)")
+						return "Name, email or date is missing, please check ;)"
 					else:
 						bday = line[2].split("-")
 						dayok = calendar.monthrange(int(bday[0]),int(bday[1]))[1]
 						if (int(bday[2]) <= dayok) and (int(bday[1]) > 0) and (int(bday[1]) < 13): 
 							email_numb +=1
 							all_emails.update({line[1]:[line[0], [int(bday[0]), int(bday[1]), int(bday[2])]]})
+							db[line[1]] = [line[0], [int(bday[0]), int(bday[1]), int(bday[2])]]
 						
 			else:
-				print("File is empty")
+				return "File is empty"
 		else:
-			print("Can't open file")
+			return "Can't open file"
 
 def message_form(name, bname, bday, delta):
 	if (bday[1] < 10) or (bday[2] < 10):
@@ -86,12 +92,23 @@ def send_email(sno, syes):
 					server.sendmail(sender_email, y[0], message)
 
 if(options[0] == "check"):
-	check_file(filename, email_numb)
+	if_file = check_file(filename, email_numb)
+	if if_file == None:
+		db.commit()
+		db.close()
+	else:
+		db.close()
+		os.remove(db_filename)
+
 
 if(options[0] == "send"):
-	check_file(filename, email_numb)
-	send_email(send_no, send_yes)
-	for bd in send_no:
-		print(bd)
+	if_file = check_file(filename, email_numb)
+	if if_file == None:
+		send_email(send_no, send_yes)
+		print(os.getcwd()+"\\bday.sqlite")
+
+		# čia tam, kad matyųsi gimtadininkai (žiūrėti gif'ą)
+		for bd in send_no:
+			print(bd)
 
 print("Finished")
