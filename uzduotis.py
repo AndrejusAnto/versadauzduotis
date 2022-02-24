@@ -34,7 +34,7 @@ db_filename = os.getcwd() + "\\" + db_name
 def check_file(fname):
 	lines_numb = 0
 	email_numb = 0
-	db = SqliteDict("bdays.sqlite")
+	db = SqliteDict(db_name)
 	with open(fname, newline='') as csvfile:
 		if csvfile:
 			lines = [l for idx, l in enumerate(csv.reader(csvfile)) if idx != 0]
