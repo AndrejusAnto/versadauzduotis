@@ -43,20 +43,21 @@ def check_file(fname):
 				for line in lines:
 					if (line[0] == '') or (line[1] == '') or (line[2] == ''):
 						db.close()
-						return "Name, email or date is missing, please check ;)"
+						return f"Name, email or date is missing, please check {' '.join(line)}"
 					else:
-						bday = line[2].split("-")
-						dayok = calendar.monthrange(int(bday[0]),int(bday[1]))[1]
-						if ((int(bday[2]) > 0) and (int(bday[2]) <= dayok)) and ((int(bday[1]) > 0) and (int(bday[1]) < 13)): 
-							db[line[1]] = [line[0], [int(bday[0]), int(bday[1]), int(bday[2])]]
-							email_numb +=1
-							if lines_numb == email_numb:
-								return db
+						if "@" in line[1]:
+							bday = line[2].split("-")
+							dayok = calendar.monthrange(int(bday[0]),int(bday[1]))[1]
+							if ((int(bday[2]) > 0) and (int(bday[2]) <= dayok)) and ((int(bday[1]) > 0) and (int(bday[1]) < 13)): 
+								db[line[1]] = [line[0], [int(bday[0]), int(bday[1]), int(bday[2])]]
+								email_numb +=1
+								if lines_numb == email_numb:
+									return db
+							else:
+								db.close()
+								return f"Date is wrong, check {' '.join(line)}"
 						else:
-							db.close()
-							return f"Date is wrong, check {' '.join(line)}"
-
-						
+							f"Incorrect email, check {' '.join(line)}"
 			else:
 				db.close()
 				return "File is empty"
